@@ -67,8 +67,4 @@ contract DeployMoodNftTest is Test {
             )
         );
     }
-
-    function _baseURI() internal pure returns (string memory) {
-        return "data:application/json;base64,";
-    }
 }
