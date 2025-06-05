@@ -45,24 +45,7 @@ contract MoodNft is ERC721 {
             imageURI = s_sadSvgImageUri;
         }
 
-        return
-            string(
-                abi.encodePacked(
-                    _baseURI(),
-                    Base64.encode(
-                        bytes(
-                            abi.encodePacked(
-                                '{"name":"',
-                                name(),
-                                '", "description":"An NFT that reflects the mood of the owner, 100% on Chain!", ',
-                                '"attributes": [{"trait_type": "moodiness", "value": 100}], "image":"',
-                                imageURI,
-                                '"}'
-                            )
-                        )
-                    )
-                )
-            );
+        return getBaseTokenURI(imageURI);
     }
 
     function flipMood(uint256 tokenId) public {
@@ -82,5 +65,36 @@ contract MoodNft is ERC721 {
 
     function _baseURI() internal pure override returns (string memory) {
         return "data:application/json;base64,";
+    }
+
+    function getBaseTokenURI(
+        string memory imageURI
+    ) public pure returns (string memory) {
+        return
+            string(
+                abi.encodePacked(
+                    _baseURI(),
+                    Base64.encode(
+                        bytes(
+                            abi.encodePacked(
+                                '{"name": "Mood NFT", ',
+                                '"description":"An NFT that reflects the mood of the owner, 100% on Chain!", ',
+                                '"attributes": [{"trait_type": "moodiness", "value": 100}], "image":"',
+                                imageURI,
+                                '"}'
+                            )
+                        )
+                    )
+                )
+            );
+    }
+
+    // Getters
+    function getSadSvgImageUri() public view returns (string memory) {
+        return s_sadSvgImageUri;
+    }
+
+    function getHappySvgImageUri() public view returns (string memory) {
+        return s_happySvgImageUri;
     }
 }

@@ -4,13 +4,17 @@ pragma solidity ^0.8.20;
 
 import {Test, console} from "forge-std/Test.sol";
 import {DeployMoodNft} from "../../script/DeployMoodNft.s.sol";
+import {MoodNft} from "../../src/MoodNft.sol";
+import {Base64} from "@openzeppelin/contracts/utils/Base64.sol";
 
 contract DeployMoodNftTest is Test {
     DeployMoodNft public deployMoodNft;
+    MoodNft public moodNft;
     address public USER = makeAddr("user");
 
     function setUp() public {
         deployMoodNft = new DeployMoodNft();
+        moodNft = deployMoodNft.run();
     }
 
     function testConvertSvgToUri() public view {
@@ -23,5 +27,48 @@ contract DeployMoodNftTest is Test {
             keccak256(abi.encodePacked(actualUri)) ==
                 keccak256(abi.encodePacked(expectedUri))
         );
+    }
+
+    function testViewTokenUri() public {
+        vm.prank(USER);
+        moodNft.mintNft();
+        console.log(moodNft.tokenURI(0));
+        assert(
+            keccak256(abi.encodePacked(moodNft.tokenURI(0))) !=
+                keccak256(abi.encodePacked(""))
+        );
+    }
+
+    function testFlipTokenToSad() public {
+        vm.startPrank(USER);
+        moodNft.mintNft();
+        moodNft.flipMood(0);
+        vm.stopPrank();
+        assertEq(
+            keccak256(abi.encodePacked(moodNft.tokenURI(0))),
+            keccak256(
+                abi.encodePacked(
+                    moodNft.getBaseTokenURI(moodNft.getSadSvgImageUri())
+                )
+            )
+        );
+    }
+
+    function testMoodNftIsHappyAtMint() public {
+        vm.startPrank(USER);
+        moodNft.mintNft();
+        vm.stopPrank();
+        assertEq(
+            keccak256(abi.encodePacked(moodNft.tokenURI(0))),
+            keccak256(
+                abi.encodePacked(
+                    moodNft.getBaseTokenURI(moodNft.getHappySvgImageUri())
+                )
+            )
+        );
+    }
+
+    function _baseURI() internal pure returns (string memory) {
+        return "data:application/json;base64,";
     }
 }
